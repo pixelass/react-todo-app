@@ -12,5 +12,5 @@ app.get("/api/todos", (req, res) => {
 });
 
 app.listen(port, () => {
-	console.log(`Test`);
+	console.log(`Example app listening on port ${port}`);
 });
