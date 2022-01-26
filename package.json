@@ -1,6 +1,7 @@
 {
   "name": "react-bare-bone-template",
   "version": "0.1.0",
+  "type": "module",
   "private": true,
   "scripts": {
     "build": "react-scripts build",
