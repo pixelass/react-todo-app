@@ -2,7 +2,6 @@ import camelcaseKeys from "camelcase-keys";
 import cors from "cors";
 import { config } from "dotenv";
 import express from "express";
-import { readFile, writeFile } from "fs/promises";
 import mongoose from "mongoose";
 import process from "node:process";
 import Todo from "./model/todo.models.js";
@@ -19,8 +18,6 @@ app.use(cors());
 app.get("/", (request, response) => {
 	response.send("Hello World!");
 });
-
-const DATABASE_URI = "./database/database.json";
 
 app.get("/api/todos", async (request, response, next) => {
 	try {
@@ -65,49 +62,45 @@ app.post("/api/todos", async (request, response, next) => {
 	}
 });
 
-app.delete("/api/todos", async (request, response, next) => {
-	const { id } = request.body;
+app.put("/api/todos/:id", async (request, response, next) => {
 	try {
-		const data = await readFile(DATABASE_URI, "utf-8");
-		const json = JSON.parse(data);
-		const index = json.todos.findIndex(user => user.id === id);
-		if (index < 0) {
-			response.status(400);
-			response.json({ error: { message: "This entry does not exist" } });
-			return;
-		}
-		json.todos.splice(index, 1);
-		await writeFile(DATABASE_URI, JSON.stringify(json, null, 4));
-		// Send a 204 (No Content)
-		response.status(204);
-		response.send();
-		// Or 200
-		// response.status(200);
-		// response.send("entry deleted");
+		const { id } = request.params;
+		const mongoResponse = await Todo.findByIdAndUpdate(
+			id,
+			request.body,
+			{
+				returnDocument: "after",
+			},
+			() => {
+				response.status(400);
+				response.json({ error: { message: "This entry does not exist" } });
+			}
+		);
+		console.log(mongoResponse);
+		// Send a 200
+		response.status(200);
+		response.send(mongoResponse);
+		// Or 204 (No Content)
+		// response.status(204);
+		// response.send();
 	} catch (error_) {
 		next(error_);
 	}
 });
 
-app.put("/api/todos", async (request, response, next) => {
+app.delete("/api/todos/:id", async (request, response, next) => {
 	try {
-		const { id, update } = request.body;
-		const data = await readFile(DATABASE_URI, "utf-8");
-		const json = JSON.parse(data);
-		const index = json.todos.findIndex(todo => todo.id === id);
-		if (index < 0) {
+		const { id } = request.params;
+		await Todo.findByIdAndDelete(id, null, () => {
 			response.status(400);
 			response.json({ error: { message: "This entry does not exist" } });
-			return;
-		}
-		json.todos[index] = { ...json.todos[index], ...update, id };
-		await writeFile(DATABASE_URI, JSON.stringify(json, null, 4));
-		// Send a 200
-		response.status(200);
-		response.send(json.todos[index]);
-		// Or 204 (No Content)
-		// response.status(204);
-		// response.send();
+		});
+		// Send a 204
+		response.status(204);
+		response.send();
+		// Or 200
+		// response.status(20);
+		// response.send(mongoResponse);
 	} catch (error_) {
 		next(error_);
 	}

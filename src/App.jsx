@@ -53,14 +53,13 @@ const App = () => {
 									type="checkbox"
 									checked={todo.isChecked}
 									onChange={() => {
-										fetch(ENDPOINT, {
+										fetch(`${ENDPOINT}/${todo._id}`, {
 											method: "PUT",
 											headers: {
 												"Content-Type": "application/json",
 											},
 											body: JSON.stringify({
-												id: todo._id,
-												update: { isChecked: !todo.isChecked },
+												isChecked: !todo.isChecked,
 											}),
 										})
 											.then(response => response.json())
@@ -81,7 +80,7 @@ const App = () => {
 							</label>
 							<button
 								onClick={() => {
-									fetch(ENDPOINT, {
+									fetch(`${ENDPOINT}/${todo._id}`, {
 										method: "DELETE",
 										headers: {
 											"Content-Type": "application/json",
