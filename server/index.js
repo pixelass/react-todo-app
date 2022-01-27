@@ -22,9 +22,9 @@ const DATABASE_URI = "./database/database.json";
 
 app.get("/api/todos", async (request, response, next) => {
 	try {
-		const data = await readFile(DATABASE_URI, "utf8");
-		const json = JSON.parse(data);
-		response.json(json.todos);
+		const collection = getTodos();
+		const entries = await collection.find().toArray();
+		response.json(entries);
 	} catch (error_) {
 		next(error_);
 	}
@@ -33,14 +33,13 @@ app.get("/api/todos", async (request, response, next) => {
 app.post("/api/todos", async (request, response, next) => {
 	try {
 		const collection = getTodos();
-
 		const todo = {
 			...request.body,
 			isChecked: false,
 		};
-		const mongoDbResponse = await collection.insertOne(todo);
+		await collection.insertOne(todo);
 		response.status(201);
-		response.json({ ...todo, id: mongoDbResponse.insertedId });
+		response.json(todo);
 	} catch (error_) {
 		next(error_);
 	}
