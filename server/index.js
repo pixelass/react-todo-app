@@ -1,3 +1,4 @@
+import camelcaseKeys from "camelcase-keys";
 import cors from "cors";
 import { config } from "dotenv";
 import express from "express";
@@ -24,6 +25,25 @@ const DATABASE_URI = "./database/database.json";
 app.get("/api/todos", async (request, response, next) => {
 	try {
 		const mongoResponse = await Todo.find();
+		response.json(mongoResponse);
+	} catch (error_) {
+		next(error_);
+	}
+});
+
+app.get("/api/todos/q", async (request, response, next) => {
+	try {
+		const query = camelcaseKeys(request.query);
+		const mongoResponse = await Todo.find(query);
+		response.json(mongoResponse);
+	} catch (error_) {
+		next(error_);
+	}
+});
+
+app.get("/api/todos/:id", async (request, response, next) => {
+	try {
+		const mongoResponse = await Todo.find({ _id: request.params.id });
 		response.json(mongoResponse);
 	} catch (error_) {
 		next(error_);
