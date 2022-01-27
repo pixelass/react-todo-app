@@ -30,6 +30,6 @@ export const getCollection = name => {
  *
  * @return {*}
  */
-export const getTodo = () => {
+export const getTodos = () => {
 	return getCollection("todos");
 };

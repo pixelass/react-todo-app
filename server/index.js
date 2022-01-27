@@ -3,14 +3,13 @@ import { config } from "dotenv";
 import express from "express";
 import { readFile, writeFile } from "fs/promises";
 import process from "node:process";
-import { v4 as uuid } from "uuid";
-import { connect as connectDatabase } from "./utils/database.js";
+import { connect as connectDatabase, getTodos } from "./utils/database.js";
 
 // First operation after imports. (As early as possible in the code)
 config();
 
 const app = express();
-const port = process.env.SERVER_PORT || 1337;
+const port = 1337;
 
 app.use(express.json());
 app.use(cors());
@@ -33,19 +32,15 @@ app.get("/api/todos", async (request, response, next) => {
 
 app.post("/api/todos", async (request, response, next) => {
 	try {
-		const data = await readFile(DATABASE_URI, "utf8");
-		const json = JSON.parse(data);
+		const collection = getTodos();
 
 		const todo = {
 			...request.body,
 			isChecked: false,
-			id: uuid(),
 		};
-
-		json.todos.push(todo);
-		await writeFile(DATABASE_URI, JSON.stringify(json, null, 4));
+		const mongoDbResponse = await collection.insertOne(todo);
 		response.status(201);
-		response.json(todo);
+		response.json({ ...todo, id: mongoDbResponse.insertedId });
 	} catch (error_) {
 		next(error_);
 	}
@@ -100,15 +95,18 @@ app.put("/api/todos", async (request, response, next) => {
 });
 
 const connect = async uri => {
+	console.log(uri);
 	if (!uri) {
 		throw new Error("No uri was provided");
 	}
 	try {
+		console.log("Connecting to MongoDB");
 		await connectDatabase(uri);
 		app.listen(port, () => {
 			console.log(`Server listening on port ${port}`);
 		});
 	} catch (error_) {
+		console.error(error_);
 		throw new Error(error_);
 	}
 };
