@@ -74,7 +74,7 @@ app.put("/api/todos", async (request, response, next) => {
 		const { id, update } = request.body;
 		const data = await readFile(DATABASE_URI, "utf-8");
 		const json = JSON.parse(data);
-		const index = json.todos.findIndex(user => user.id === id);
+		const index = json.todos.findIndex(todo => todo.id === id);
 		if (index < 0) {
 			response.status(400);
 			response.json({ error: { message: "This entry does not exist" } });
