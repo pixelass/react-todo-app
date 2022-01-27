@@ -1,10 +1,16 @@
 import cors from "cors";
+import { config } from "dotenv";
 import express from "express";
 import { readFile, writeFile } from "fs/promises";
+import process from "node:process";
 import { v4 as uuid } from "uuid";
+import { connect as connectDatabase } from "./utils/database.js";
+
+// First operation after imports. (As early as possible in the code)
+config();
 
 const app = express();
-const port = 1337;
+const port = process.env.SERVER_PORT || 1337;
 
 app.use(express.json());
 app.use(cors());
@@ -93,6 +99,18 @@ app.put("/api/todos", async (request, response, next) => {
 	}
 });
 
-app.listen(port, () => {
-	console.log(`Example app listening on port ${port}`);
-});
+const connect = async uri => {
+	if (!uri) {
+		throw new Error("No uri was provided");
+	}
+	try {
+		await connectDatabase(uri);
+		app.listen(port, () => {
+			console.log(`Server listening on port ${port}`);
+		});
+	} catch (error_) {
+		throw new Error(error_);
+	}
+};
+
+void connect(process.env.MONGODB_URI);
