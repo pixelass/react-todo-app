@@ -65,24 +65,11 @@ app.post("/api/todos", async (request, response, next) => {
 app.put("/api/todos/:id", async (request, response, next) => {
 	try {
 		const { id } = request.params;
-		const mongoResponse = await Todo.findByIdAndUpdate(
-			id,
-			request.body,
-			{
-				returnDocument: "after",
-			},
-			() => {
-				response.status(400);
-				response.json({ error: { message: "This entry does not exist" } });
-			}
-		);
-		console.log(mongoResponse);
-		// Send a 200
+		const mongoResponse = await Todo.findByIdAndUpdate(id, request.body, {
+			returnDocument: "after",
+		});
 		response.status(200);
 		response.send(mongoResponse);
-		// Or 204 (No Content)
-		// response.status(204);
-		// response.send();
 	} catch (error_) {
 		next(error_);
 	}
@@ -91,16 +78,9 @@ app.put("/api/todos/:id", async (request, response, next) => {
 app.delete("/api/todos/:id", async (request, response, next) => {
 	try {
 		const { id } = request.params;
-		await Todo.findByIdAndDelete(id, null, () => {
-			response.status(400);
-			response.json({ error: { message: "This entry does not exist" } });
-		});
-		// Send a 204
+		await Todo.findByIdAndDelete(id, null);
 		response.status(204);
 		response.send();
-		// Or 200
-		// response.status(20);
-		// response.send(mongoResponse);
 	} catch (error_) {
 		next(error_);
 	}
