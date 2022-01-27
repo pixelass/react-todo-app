@@ -2,8 +2,9 @@ import cors from "cors";
 import { config } from "dotenv";
 import express from "express";
 import { readFile, writeFile } from "fs/promises";
+import mongoose from "mongoose";
 import process from "node:process";
-import { connect as connectDatabase, getTodos } from "./utils/database.js";
+import Todo from "./model/todo.models.js";
 
 // First operation after imports. (As early as possible in the code)
 config();
@@ -22,9 +23,8 @@ const DATABASE_URI = "./database/database.json";
 
 app.get("/api/todos", async (request, response, next) => {
 	try {
-		const collection = getTodos();
-		const entries = await collection.find().toArray();
-		response.json(entries);
+		const mongoResponse = await Todo.find();
+		response.json(mongoResponse);
 	} catch (error_) {
 		next(error_);
 	}
@@ -32,14 +32,14 @@ app.get("/api/todos", async (request, response, next) => {
 
 app.post("/api/todos", async (request, response, next) => {
 	try {
-		const collection = getTodos();
-		const todo = {
+		const todo = new Todo({
 			...request.body,
 			isChecked: false,
-		};
-		await collection.insertOne(todo);
+		});
+
+		const mongoResponse = await todo.save();
 		response.status(201);
-		response.json(todo);
+		response.json(mongoResponse);
 	} catch (error_) {
 		next(error_);
 	}
@@ -100,7 +100,7 @@ const connect = async uri => {
 	}
 	try {
 		console.log("Connecting to MongoDB");
-		await connectDatabase(uri);
+		await mongoose.connect(uri);
 		app.listen(port, () => {
 			console.log(`Server listening on port ${port}`);
 		});

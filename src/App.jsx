@@ -47,7 +47,7 @@ const App = () => {
 			<ul>
 				{todos.map((todo, index) => {
 					return (
-						<li key={todo.id}>
+						<li key={todo._id}>
 							<label>
 								<input
 									type="checkbox"
@@ -59,7 +59,7 @@ const App = () => {
 												"Content-Type": "application/json",
 											},
 											body: JSON.stringify({
-												id: todo.id,
+												id: todo._id,
 												update: { isChecked: !todo.isChecked },
 											}),
 										})
@@ -86,7 +86,7 @@ const App = () => {
 										headers: {
 											"Content-Type": "application/json",
 										},
-										body: JSON.stringify({ id: todo.id }),
+										body: JSON.stringify({ id: todo._id }),
 									}).then(() => {
 										const update = [...todos];
 										update.splice(index, 1);
